@@ -3,126 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wereldwijd Weerstation</title>
+    <title>SkyCast // Geo-Adaptive Consensus Weather Station</title>
     <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1a202c;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --accent-color: #3182ce;
+            --block-bg: #f7fafc;
+            --hero-bg: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+        }
+
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #38bdf8;
+            --block-bg: #0f172a;
+            --hero-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-            background-color: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background-color: var(--bg-color);
             padding: 12px;
             margin: 0;
-            color: #2d3748;
+            color: var(--text-main);
+            transition: background 0.3s, color 0.3s;
         }
         .wrapper {
-            max-width: 480px;
+            max-width: 460px;
             margin: 0 auto;
-            background: #ffffff;
+            background: var(--card-bg);
             padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        h1 { text-align: center; font-size: 20px; margin-bottom: 4px; color: #1a202c; }
-        .bronnen { text-align: center; font-size: 11px; color: #718096; margin-bottom: 16px; }
         
+        /* Brand Header */
+        .brand { text-align: center; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 2px; color: var(--text-main); }
+        .brand span { color: #3182ce; }
+        
+        /* Model Consensus Bar & Popover */
+        .consensus-bar {
+            text-align: center; font-size: 10px; color: #3182ce; margin-bottom: 12px; 
+            text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; font-weight: bold;
+            background: var(--block-bg); padding: 5px; border-radius: 6px; border: 1px dashed var(--accent-color);
+        }
+        .consensus-bar:hover { background: #ebf8ff; }
+        
+        .consensus-window {
+            display: none; background: var(--block-bg); border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 11px;
+        }
+        .consensus-title { font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+        .consensus-region { font-size: 9px; background: #3182ce; color: white; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+        .model-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+        .model-name { font-weight: 600; width: 110px; }
+        .model-bar-bg { flex: 1; background: var(--border-color); height: 6px; border-radius: 3px; margin: 0 8px; overflow: hidden; }
+        .model-bar-fill { background: var(--accent-color); height: 100%; width: 0%; transition: width 0.5s ease; }
+        .model-pct { font-weight: bold; width: 30px; text-align: right; color: var(--text-muted); }
+
+        /* Favorites Quickbar */
+        .fav-balk { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+        .fav-btn {
+            background: var(--block-bg); border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 8px 4px; font-size: 11px; border-radius: 10px; cursor: pointer; font-weight: 600;
+            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* Hero Glance Card */
+        .glance-card {
+            background: var(--hero-bg); border-radius: 14px; padding: 16px; text-align: center; margin-bottom: 14px; border: 1px solid var(--border-color);
+        }
+        .glance-main { display: flex; justify-content: center; align-items: center; gap: 24px; margin: 8px 0; }
+        .glance-emoji { font-size: 48px; }
+        .glance-temp { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+        .glance-tip { font-size: 13px; font-weight: 600; margin-top: 8px; line-height: 1.4; color: var(--text-main); }
+
         .menu-sectie { display: block; }
         .gps-btn {
-            display: block;
-            width: 100%;
-            background-color: #38a169;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 12px;
+            display: block; width: 100%; background-color: #38a169; color: white; border: none;
+            padding: 10px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 8px;
         }
-        .or-text { text-align: center; color: #718096; font-size: 12px; margin-bottom: 12px; }
-        .search-box { display: flex; gap: 8px; margin-bottom: 12px; }
-        .search-box input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; outline: none; }
-        .search-box input:focus { border-color: #3182ce; }
-        .search-box button { background-color: #3182ce; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .or-text { text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 8px; }
+        .search-box { display: flex; gap: 6px; margin-bottom: 12px; }
+        .search-box input { flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: transparent; color: var(--text-main); }
+        .search-box button { background-color: #3182ce; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        .msg-box { text-align: center; font-weight: bold; margin: 10px 0; font-size: 14px; }
+        .msg-box { text-align: center; font-weight: bold; margin: 10px 0; font-size: 13px; }
         .error { color: #e53e3e; }
-        .status { color: #718096; font-style: italic; }
+        .status { color: var(--text-muted); font-style: italic; }
         
-        /* Dashboard & Schermen */
-        .dashboard { display: none; margin-top: 10px; }
+        .dashboard { display: none; }
         .scherm { display: none; }
         .scherm.actief { display: block; }
         
-        .title-loc { font-size: 19px; font-weight: bold; color: #3182ce; text-align: center; }
-        .title-time { font-size: 12px; color: #718096; text-align: center; margin-bottom: 16px; }
+        .title-loc { font-size: 18px; font-weight: bold; text-align: center; color: var(--text-main); }
+        .title-time { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 12px; }
         
         .back-btn {
-            display: inline-flex;
-            align-items: center;
-            background-color: #edf2f7;
-            color: #2d3748;
-            border: 1px solid #cbd5e0;
-            padding: 8px 14px;
-            font-size: 13px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 12px;
-            width: 100%;
-            justify-content: center;
+            display: inline-flex; background-color: var(--block-bg); color: var(--text-main);
+            border: 1px solid var(--border-color); padding: 8px; font-size: 13px; font-weight: bold;
+            border-radius: 6px; cursor: pointer; margin-bottom: 12px; width: 100%; justify-content: center;
         }
         
-        .sub-t { font-size: 15px; font-weight: bold; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin: 16px 0 10px 0; color: #1a202c; }
+        .sub-t { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 3px; margin: 14px 0 8px 0; }
         
-        .blok-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .blok { background: #f7fafc; padding: 12px; border-radius: 8px; border-left: 4px solid #3182ce; }
-        .blok h3 { margin: 0 0 4px 0; font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
-        .blok p { margin: 0; font-size: 15px; font-weight: bold; color: #1a202c; }
+        /* Uur-balk */
+        .hourly-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; scrollbar-width: thin; }
+        .hourly-item { flex: 0 0 52px; background: var(--block-bg); padding: 6px; border-radius: 8px; text-align: center; font-size: 11px; border: 1px solid var(--border-color); }
+        .hourly-item .time { color: var(--text-muted); }
+        .hourly-item .temp { font-weight: 700; margin-top: 2px; }
+        .hourly-item .icon { font-size: 16px; margin: 2px 0; }
+
+        /* Index Grid */
+        .index-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .index-blok { background: var(--block-bg); border: 1px solid var(--border-color); padding: 6px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: 600; }
+        .index-blok div { font-size: 13px; font-weight: bold; margin-top: 2px; }
+        .badge-good { color: #38a169; }
+        .badge-avg { color: #dd6b20; }
+        .badge-bad { color: #e53e3e; }
+
+        .blok-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .blok { background: var(--block-bg); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-color); }
+        .blok h3 { margin: 0 0 2px 0; font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+        .blok p { margin: 0; font-size: 14px; font-weight: bold; color: var(--text-main); }
         .full { grid-column: span 2; }
         
-        /* Kleding/Tip styling */
-        .tip-status { background: #f0fff4; border-left: 4px solid #38a169; padding: 10px; font-size: 13px; color: #22543d; line-height: 1.4; }
-        .bron-status { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 10px; font-size: 12px; color: #2b6cb0; line-height: 1.4; }
+        .radar-box { width: 100%; height: 220px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 4px; }
+        .radar-box iframe { width: 100%; height: 100%; border: none; }
         
-        /* Grote Weermens Avatar */
-        .weermens-groot { font-size: 38px; text-align: center; margin-bottom: 5px; }
-        
-        /* Klikbare Verwachting rijen */
-        .rij-lijst { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        /* Weeklijst */
+        .rij-lijst { display: flex; flex-direction: column; gap: 6px; }
         .rij { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            background: #f7fafc; 
-            padding: 10px 10px; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            border: 1px solid #e2e8f0; 
-            cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
-            -webkit-tap-highlight-color: transparent;
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--block-bg); padding: 8px 10px; border-radius: 8px; font-size: 13px; 
+            border: 1px solid var(--border-color); cursor: pointer;
         }
-        .rij:active { background: #edf2f7; transform: scale(0.99); }
-        .rij-mens { font-size: 22px; width: 35px; text-align: center; }
-        .rij-day { font-weight: bold; width: 85px; }
-        .rij-desc { flex: 1; color: #4a5568; font-size: 13px; padding-right: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .rij-rain { color: #3182ce; width: 50px; text-align: right; font-weight: bold; font-size: 12px; }
-        .rij-temp { font-weight: bold; width: 75px; text-align: right; }
-        .rij-pijl { color: #cbd5e0; font-size: 12px; margin-left: 4px; }
+        .rij-mens { font-size: 18px; width: 30px; text-align: center; }
+        .rij-day { font-weight: 600; width: 80px; }
+        .rij-desc { flex: 1; color: var(--text-muted); font-size: 12px; }
+        .rij-rain { color: #3182ce; width: 45px; text-align: right; font-weight: 600; font-size: 11px; }
+        .rij-temp { font-weight: bold; width: 65px; text-align: right; }
+
+        .weermens-groot { text-align: center; font-size: 64px; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <h1>Multi-Bron Weeroverzicht</h1>
-    <div class="bronnen">Data: KNMI, Buienradar, ECMWF, NOAA & DWD</div>
+    <div class="brand">Sky<span>Cast</span></div>
     
-    <!-- Menu / Input Sectie -->
+    <!-- Klikbare Multi-Model Balk -->
+    <div class="consensus-bar" onclick="toggleConsensusWindow()">
+        🌍 Dynamisch Consensus Model Actief (Klik voor details)
+    </div>
+    
+    <!-- Het adaptieve live-weging venster -->
+    <div id="consensusWindow" class="consensus-window">
+        <div class="consensus-title">
+            <span>Live Weerbronnen Consensus</span>
+            <span class="consensus-region" id="geoRegionTag">NL / BENELUX</span>
+        </div>
+        <div class="model-row"><span class="model-name">🇳🇱 KNMI (Harmonie)</span><div class="model-bar-bg"><div id="wb-knmi" class="model-bar-fill"></div></div><span class="model-pct" id="wp-knmi">0%</span></div>
+        <div class="model-row"><span class="model-name">🇳🇱 Meteo-NL</span><div class="model-bar-bg"><div id="wb-meteonl" class="model-bar-fill"></div></div><span class="model-pct" id="wp-meteonl">0%</span></div>
+        <div class="model-row"><span class="model-name">🇪🇺 ECMWF (Euro-Hoofd)</span><div class="model-bar-bg"><div id="wb-ecmwf" class="model-bar-fill"></div></div><span class="model-pct" id="wp-ecmwf">0%</span></div>
+        <div class="model-row"><span class="model-name">🇺🇸 GFS (Amerikaans)</span><div class="model-bar-bg"><div id="wb-gfs" class="model-bar-fill"></div></div><span class="model-pct" id="wp-gfs">0%</span></div>
+        <div class="model-row"><span class="model-name">🇩🇪 ICON (Duitsland)</span><div class="model-bar-bg"><div id="wb-icon" class="model-bar-fill"></div></div><span class="model-pct" id="wp-icon">0%</span></div>
+        <div class="model-row"><span class="model-name">🇨🇦 GEM (Canadees)</span><div class="model-bar-bg"><div id="wb-gem" class="model-bar-fill"></div></div><span class="model-pct" id="wp-gem">0%</span></div>
+        <div class="model-row"><span class="model-name">🇫🇷 METEO-FR (AROME)</span><div class="model-bar-bg"><div id="wb-fr" class="model-bar-fill"></div></div><span class="model-pct" id="wp-fr">0%</span></div>
+    </div>
+    
+    <div class="fav-balk">
+        <button class="fav-btn" onclick="laadFavoriet('Thuis')" id="btn-fav-Thuis">🏠 Thuis</button>
+        <button class="fav-btn" onclick="laadFavoriet('Werk')" id="btn-fav-Werk">💼 Werk</button>
+        <button class="fav-btn" onclick="laadFavoriet('Vakantie')" id="btn-fav-Vakantie">🏖️ Slot 3</button>
+    </div>
+
     <div class="menu-sectie">
-        <button class="gps-btn" onclick="startGPS()">📍 Gebruik mijn GPS Locatie</button>
-        <div class="or-text">— OF voer handmatig in —</div>
-        
+        <button class="gps-btn" onclick="startGPS()">📍 Gebruik Live GPS Locatie</button>
+        <div class="or-text">— OF ZOEK EEN STAD —</div>
         <div class="search-box">
-            <input type="text" id="stadInvoer" placeholder="Plaatsnaam (bijv. Rotterdam)">
+            <input type="text" id="stadInvoer" placeholder="Voer plaatsnaam in...">
             <button onclick="startHandmatig()">Zoek</button>
         </div>
     </div>
@@ -130,353 +197,416 @@
     <div id="statusMelding" class="msg-box status" style="display:none;">Laden...</div>
     <div id="foutMelding" class="msg-box error"></div>
     
-    <!-- Dashboard Master -->
     <div id="weerDashboard" class="dashboard">
         <div id="weerLocatie" class="title-loc">-</div>
         <div id="weerTijd" class="title-time">-</div>
         
-        <!-- SCHERM 1: Vandaag (Hoofdscherm) -->
+        <!-- HOOFDSCHERM -->
         <div id="schermVandaag" class="scherm actief">
-            <div class="weermens-groot" id="vandaagMensAvatar">👤</div>
-            <div class="sub-t">Weeroverzicht Vandaag</div>
+            
+            <!-- IN 1 OOGOPSLAG HERO CARD -->
+            <div class="glance-card">
+                <div class="glance-main">
+                    <div class="glance-emoji" id="heroWeatherIcon">☀️</div>
+                    <div class="glance-emoji" id="heroDressIcon">🧍</div>
+                    <div class="glance-temp" id="heroTemp">-</div>
+                </div>
+                <div id="heroStatusText" style="font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">-</div>
+                <div class="glance-tip" id="heroKledingTip">-</div>
+            </div>
+
+            <div class="sub-t">⏰ Komende 24 Uur</div>
+            <div class="hourly-scroll" id="uurScrollBalk"></div>
+
+            <div class="sub-t">🏃 Activiteiten Index</div>
+            <div class="index-grid">
+                <div class="index-blok">Hardlopen<div id="idxHardlopen">-</div></div>
+                <div class="index-blok">Terrasje<div id="idxTerras">-</div></div>
+                <div class="index-blok">Fietsen<div id="idxFiets">-</div></div>
+            </div>
+
+            <div class="sub-t">Huidige Details</div>
             <div class="blok-grid">
-                <div class="blok"><h3>Actueel Temp</h3><p id="vandaagNu">-</p></div>
                 <div class="blok"><h3>Min / Max Temp</h3><p id="vandaagMinMax">-</p></div>
-                <div class="blok"><h3>Wind (Nu)</h3><p id="vandaagWind">-</p></div>
+                <div class="blok"><h3>Windkracht</h3><p id="vandaagWind">-</p></div>
                 <div class="blok"><h3>Regenkans</h3><p id="vandaagKans">-</p></div>
-                <div class="blok"><h3>Hoeveelheid</h3><p id="vandaagMms">-</p></div>
-                <div class="blok"><h3>Onweer / UV</h3><p id="vandaagOnweer">-</p></div>
-                <div class="blok full"><h3>Gecombineerde Status</h3><p id="vandaagStatus" style="font-weight:normal;">-</p></div>
+                <div class="blok"><h3>Neerslag</h3><p id="vandaagMms">-</p></div>
+                <div class="blok"><h3>UV Index</h3><p id="vandaagUV">-</p></div>
                 
-                <!-- Live Kleding- & Activiteitentip -->
-                <div class="blok full tip-status">
-                    <h3>💡 Kledingadvies & Activiteit</h3>
-                    <p id="vandaagTip" style="font-size: 13px; font-weight: normal; margin-top: 2px;">-</p>
+                <div class="blok full">
+                    <h3>🍃 Luchtkwaliteit & Pollen</h3>
+                    <p id="vandaagPollen" style="font-size:12px; font-weight:normal; margin-top:2px;">Laden...</p>
+                </div>
+                
+                <div class="blok full">
+                    <h3>☀️ Zon & Maan</h3>
+                    <p id="vandaagAstro" style="font-size:12px; font-weight:normal; margin-top:2px;">-</p>
                 </div>
 
-                <!-- Broncontrole Vandaag -->
-                <div class="blok full bron-status">
-                    <h3>📊 Multi-Bron Verificatie (Vandaag)</h3>
-                    <p id="vandaagModellen" style="font-size: 13px; font-weight: normal; margin-top: 2px;">-</p>
+                <div class="blok full">
+                    <h3>🗺️ Live Buienradar</h3>
+                    <div class="radar-box" id="radarContainer"></div>
                 </div>
             </div>
             
-            <div class="sub-t">Klik op een dag voor details & bronnen</div>
+            <div class="sub-t">6-Daagse Verwachting</div>
             <div id="komendeDagen" class="rij-lijst"></div>
         </div>
         
-        <!-- SCHERM 2: Detail per dag -->
+        <!-- DETAIL SCHERM -->
         <div id="schermDetail" class="scherm">
-            <button class="back-btn" onclick="toonVandaag()">← Terug naar Vandaag</button>
+            <button class="back-btn" onclick="toonVandaag()">← Terug naar overzicht</button>
             <div class="weermens-groot" id="detailMensAvatar">👤</div>
-            <div class="sub-t" id="detailDagNaam">Details voor ...</div>
+            <div class="sub-t" id="detailDagNaam">Details...</div>
             <div class="blok-grid">
-                <div class="blok full"><h3>Verwachting</h3><p id="detStatus">-</p></div>
-                <div class="blok"><h3>Minimum Temp</h3><p id="detMin">-</p></div>
-                <div class="blok"><h3>Maximum Temp</h3><p id="detMax">-</p></div>
+                <div class="blok full"><h3>Weersituatie</h3><p id="detStatus">-</p></div>
+                <div class="blok"><h3>Min Temp</h3><p id="detMin">-</p></div>
+                <div class="blok"><h3>Max Temp</h3><p id="detMax">-</p></div>
                 <div class="blok"><h3>Regenkans</h3><p id="detKans">-</p></div>
-                <div class="blok"><h3>Verwachte Regen</h3><p id="detMms">-</p></div>
-                <div class="blok full"><h3>⚡ Onweerrisico / Max UV</h3><p id="detOnweer">-</p></div>
-                
-                <!-- Kledingadvies voor de specifieke dag -->
-                <div class="blok full tip-status">
-                    <h3>💡 Kledingadvies voor deze dag</h3>
-                    <p id="detailTip" style="font-size: 13px; font-weight: normal; margin-top: 2px;">-</p>
-                </div>
-
-                <!-- Dynamic Broncontrole -->
-                <div class="blok full bron-status">
-                    <h3>📊 Multi-Bron Verificatie (Deze Dag)</h3>
-                    <p id="detailModellen" style="font-size: 13px; font-weight: normal; margin-top: 2px;">-</p>
+                <div class="blok"><h3>Neerslag</h3><p id="detMms">-</p></div>
+                <div class="blok full"><h3>Zonkracht (UV)</h3><p id="detUV">-</p></div>
+                <div class="blok full">
+                    <h3>💡 Kledingadvies</h3>
+                    <p id="detailTip" style="font-size:12px; font-weight:normal; margin-top:2px;">-</p>
                 </div>
             </div>
         </div>
-        
     </div>
 </div>
 
 <script>
-    var globalWeerData = null; 
-    var globalLat = 0;
-    var globalLon = 0;
-    var weekdagen = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+    var globalWeerData = null; var globalLat = 0; var globalLon = 0;
+    var consensusZichtbaar = false;
 
-    function zetStatus(tekst) {
-        document.getElementById('statusMelding').innerText = tekst;
-        document.getElementById('statusMelding').style.display = 'block';
-        document.getElementById('foutMelding').innerText = '';
+    window.onload = function() {
+        updateFavKnoppenLabels();
+        var gcLat = localStorage.getItem('weer_lat');
+        var gcLon = localStorage.getItem('weer_lon');
+        var gcNaam = localStorage.getItem('weer_naam');
+        if (gcLat && gcLon && gcNaam) {
+            globalLat = parseFloat(gcLat); globalLon = parseFloat(gcLon);
+            zetStatus("Gegevens bijwerken...");
+            haalWeer(globalLat, globalLon, gcNaam);
+        }
+    };
+
+    function toggleConsensusWindow() {
+        var w = document.getElementById('consensusWindow');
+        consensusZichtbaar = !consensusZichtbaar;
+        w.style.display = consensusZichtbaar ? 'block' : 'none';
     }
-    function verbergStatus() {
-        document.getElementById('statusMelding').style.display = 'none';
+
+    function berekenGeoWeging(lat, lon, weatherCode) {
+        var weging = { knmi: 0, meteonl: 0, ecmwf: 0, gfs: 0, icon: 0, gem: 0, fr: 0, regio: "INTERNATIONAAL" };
+
+        // Controleer of de coördinaten ruw binnen de Benelux / West-Europa vallen
+        // Breedtegraad tussen 49 en 54 Noord, Lengtegraad tussen 3 en 8 Oost
+        var isInBenelux = (lat >= 49 && lat <= 54 && lon >= 3 && lon <= 8);
+        // Noord-Amerika (Ruw: lat 24-50 Noord, lon -125 tot -65 West)
+        var isInNoordAmerika = (lat >= 24 && lat <= 50 && lon >= -125 && lon <= -65);
+
+        if (isInBenelux) {
+            weging.regio = "NL / BENELUX OPTIMALISATIE";
+            weging.knmi = 35;     // Lokale supercomputer heeft de hoogste prioriteit
+            weging.meteonl = 15;  // Lokale consensus
+            weging.ecmwf = 25;    // Europese hoofdmodel
+            weging.gfs = 10;      // Mondiale ondersteuning
+            weging.icon = 5;
+            weging.gem = 5;
+            weging.fr = 5;        // Frans model pakt zuidelijk NL mee
+
+            // Acute buien of onweerssituatie? Geef KNMI en METEO-FR (hoge resolutie) tijdelijk extra gewicht
+            if([51,53,55,61,63,65,80,81,82,95,96,99].includes(weatherCode)) {
+                weging.knmi = 40;
+                weging.fr = 15;
+                weging.ecmwf = 20;
+                weging.gfs = 5;
+            }
+        } 
+        else if (isInNoordAmerika) {
+            weging.regio = "NOORD-AMERIKA OPTIMALISATIE";
+            weging.knmi = 0;      // KNMI heeft hier geen dekking of zwaartekracht
+            weging.meteonl = 0;
+            weging.gfs = 45;      // Amerikaanse hoofdmodel leidt de dans
+            weging.gem = 25;      // Canadese model als sterke buur
+            weging.ecmwf = 20;    // Wereldwijd Europees model als second opinion
+            weging.icon = 10;     
+            weging.fr = 0;
+        } 
+        else {
+            // Rest van de wereld: Wereldwijde hoofdmodellen verdelen de koek
+            weging.regio = "MONDIALE CONSENSUS";
+            weging.knmi = 0;
+            weging.meteonl = 0;
+            weging.ecmwf = 40;    // Best presterende wereldwijde model
+            weging.gfs = 30;      // Goede tweede
+            weging.icon = 15;
+            weging.gem = 15;
+            weging.fr = 0;
+        }
+
+        // Visueel updaten
+        document.getElementById('geoRegionTag').innerText = weging.regio;
+        
+        var modellen = ['knmi', 'meteonl', 'ecmwf', 'gfs', 'icon', 'gem', 'fr'];
+        modellen.forEach(function(m) {
+            var mCode = (m === 'meteonl') ? 'meteonl' : (m === 'fr' ? 'fr' : m);
+            document.getElementById('wb-' + mCode).style.width = weging[m] + '%';
+            document.getElementById('wp-' + mCode).innerText = weging[m] + '%';
+        });
     }
-    function zetFout(tekst) {
-        document.getElementById('foutMelding').innerText = tekst;
-        document.getElementById('statusMelding').style.display = 'none';
+
+    function updateFavKnoppenLabels() {
+        var t = localStorage.getItem('fav_Thuis_naam');
+        var w = localStorage.getItem('fav_Werk_naam');
+        var v = localStorage.getItem('fav_Vakantie_naam');
+
+        document.getElementById('btn-fav-Thuis').innerText = t ? "🏠 " + t.split(',')[0] : "🏠 [Leeg slot]";
+        document.getElementById('btn-fav-Werk').innerText = w ? "💼 " + w.split(',')[0] : "💼 [Leeg slot]";
+        document.getElementById('btn-fav-Vakantie').innerText = v ? "🏖️ " + v.split(',')[0] : "🏖️ [Leeg slot]";
     }
+
+    function laadFavoriet(type) {
+        var lat = localStorage.getItem('fav_' + type + '_lat');
+        var lon = localStorage.getItem('fav_' + type + '_lon');
+        var naam = localStorage.getItem('fav_' + type + '_naam');
+        
+        if(lat && lon && naam) {
+            globalLat = parseFloat(lat); globalLon = parseFloat(lon);
+            zetStatus("Laden " + type + "...");
+            haalWeer(globalLat, globalLon, naam);
+        } else {
+            if(globalLat === 0) { zetFout("Zoek eerst een stad op om deze als favoriet op te slaan."); return; }
+            var hNaam = document.getElementById('weerLocatie').innerText;
+            localStorage.setItem('fav_' + type + '_lat', globalLat);
+            localStorage.setItem('fav_' + type + '_lon', globalLon);
+            localStorage.setItem('fav_' + type + '_naam', hNaam);
+            updateFavKnoppenLabels();
+            zetStatus("Opgeslagen in slot '" + type + "'!");
+            setTimeout(verbergStatus, 2000);
+        }
+    }
+
+    function zetStatus(t) { document.getElementById('statusMelding').innerText = t; document.getElementById('statusMelding').style.display = 'block'; document.getElementById('foutMelding').innerText = ''; }
+    function verbergStatus() { document.getElementById('statusMelding').style.display = 'none'; }
+    function zetFout(t) { document.getElementById('foutMelding').innerText = t; document.getElementById('statusMelding').style.display = 'none'; }
 
     function startGPS() {
-        if (!navigator.geolocation) {
-            zetFout("GPS niet ondersteund door browser.");
-            return;
-        }
-        zetStatus("GPS toestemming vragen...");
-        navigator.geolocation.getCurrentPosition(
-            function(pos) {
-                globalLat = pos.coords.latitude;
-                globalLon = pos.coords.longitude;
-                zetStatus("Plaatsnaam opzoeken via GPS...");
-                
-                var geoUrl = "https://nominatim.openstreetmap.org/reverse?lat=" + globalLat + "&lon=" + globalLon + "&format=json&accept-language=nl";
-                
-                fetch(geoUrl)
-                    .then(function(r) { return r.json(); })
-                    .then(function(geoData) {
-                        var stad = geoData.address.city || geoData.address.town || geoData.address.village || geoData.address.municipality || "Mijn Locatie";
-                        var land = geoData.address.country || "";
-                        var mooieNaam = stad + (land ? ", " + land : "");
-                        
-                        zetStatus("Weerdata ophalen voor " + stad + "...");
-                        haalWeer(globalLat, globalLon, mooieNaam);
-                    })
-                    .catch(function() {
-                        haalWeer(globalLat, globalLon, "Mijn GPS-Locatie (" + globalLat.toFixed(2) + ", " + globalLon.toFixed(2) + ")");
-                    });
-            },
-            function(err) {
-                zetFout("GPS toegang geweigerd. Voer handmatig een plaats in.");
-            }
-        );
+        if (!navigator.geolocation) { zetFout("GPS niet ondersteund."); return; }
+        zetStatus("GPS locatie opvragen...");
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            globalLat = pos.coords.latitude; globalLon = pos.coords.longitude;
+            fetch("https://nominatim.openstreetmap.org/reverse?lat=" + globalLat + "&lon=" + globalLon + "&format=json&accept-language=nl")
+                .then(function(r) { return r.json(); }).then(function(geo) {
+                    var s = geo.address.city || geo.address.town || geo.address.village || "Mijn Locatie";
+                    var mooi = s + (geo.address.country ? ", " + geo.address.country : "");
+                    localStorage.setItem('weer_lat', globalLat); localStorage.setItem('weer_lon', globalLon); localStorage.setItem('weer_naam', mooi);
+                    haalWeer(globalLat, globalLon, mooi);
+                }).catch(function() { haalWeer(globalLat, globalLon, "Mijn Locatie"); });
+        }, function() { zetFout("GPS toegang geweigerd. Typ handmatig een stad."); });
     }
 
     function startHandmatig() {
-        var invoer = document.getElementById('stadInvoer').value.trim();
-        if (!invoer) {
-            zetFout("Typ eerst een plaatsnaam.");
-            return;
-        }
+        var inv = document.getElementById('stadInvoer').value.trim();
+        if (!inv) { zetFout("Typ een plaatsnaam."); return; }
         zetStatus("Locatie zoeken...");
-        var url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(invoer) + "&count=1&language=nl&format=json";
-        
-        fetch(url)
-            .then(function(r){ return r.json(); })
-            .then(function(data){
-                if(!data.results || data.results.length === 0) {
-                    zetFout("Plaats niet gevonden.");
-                    return;
-                }
-                var loc = data.results[0];
-                globalLat = loc.latitude;
-                globalLon = loc.longitude;
-                var naam = loc.name + (loc.country ? ", " + loc.country : "");
-                haalWeer(globalLat, globalLon, naam);
-            })
-            .catch(function(){ zetFout("Fout bij zoeken naar locatie."); });
+        fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(inv) + "&count=1&language=nl&format=json")
+            .then(function(r){ return r.json(); }).then(function(d){
+                if(!d.results || d.results.length === 0) { zetFout("Stad niet gevonden."); return; }
+                var loc = d.results[0]; globalLat = loc.latitude; globalLon = loc.longitude;
+                var n = loc.name + (loc.country ? ", " + loc.country : "");
+                localStorage.setItem('weer_lat', globalLat); localStorage.setItem('weer_lon', globalLon); localStorage.setItem('weer_naam', n);
+                haalWeer(globalLat, globalLon, n);
+            }).catch(function(){ zetFout("Netwerkfout."); });
     }
 
-    // Bepaalt het weermensje en kledingadvies op basis van code, temp en wind/regen
+    function getBadgeClass(score) {
+        if(score >= 8) return 'badge-good';
+        if(score >= 5) return 'badge-avg';
+        return 'badge-bad';
+    }
+
+    function berekenHobbyIndexen(temp, regenkans, wind, code) {
+        var r = 10, t = 10, f = 10;
+        if([95,96,99].includes(code)) { r -= 8; t -= 10; f -= 9; }
+        else if([61,63,65,80,81,82].includes(code)) { r -= 4; t -= 8; f -= 5; }
+        if(temp < 5) r -= 3; else if(temp > 25) r -= 5; if(wind > 25) r -= 2;
+        if(temp < 15) t -= 6; else if(temp < 20) t -= 3; if(regenkans > 20) t -= (regenkans / 15);
+        if(temp < 10) f -= 4; if(wind > 25) f -= 3;
+
+        var s1 = Math.max(1, Math.min(10, Math.round(r)));
+        var s2 = Math.max(1, Math.min(10, Math.round(t)));
+        var s3 = Math.max(1, Math.min(10, Math.round(f)));
+
+        document.getElementById('idxHardlopen').className = 'index-blok ' + getBadgeClass(s1);
+        document.getElementById('idxHardlopen').innerText = s1 + "/10";
+        document.getElementById('idxTerras').className = 'index-blok ' + getBadgeClass(s2);
+        document.getElementById('idxTerras').innerText = s2 + "/10";
+        document.getElementById('idxFiets').className = 'index-blok ' + getBadgeClass(s3);
+        document.getElementById('idxFiets').innerText = s3 + "/10";
+    }
+
+    function haalExtraMilieuData(lat, lon) {
+        fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + lat + "&longitude=" + lon + "&current=pm2_5,grass_pollen,birch_pollen")
+            .then(function(r){return r.json();}).then(function(env){
+                var pm = env.current.pm2_5;
+                var pol = (env.current.grass_pollen > 25 || env.current.birch_pollen > 25) ? "⚠️ Hooikoorts Alert Actief" : "Geen pollenoverlast";
+                document.getElementById('vandaagPollen').innerHTML = "Fijnstof: <strong>" + pm + " µg/m³</strong> | Pollen: <strong>" + pol + "</strong>";
+            }).catch(function(){ document.getElementById('vandaagPollen').innerText = "Milieudata tijdelijk offline."; });
+    }
+
     function genereerWeerMensEnTip(code, maxTemp, regenkans, windSnelheid) {
-        var mens = "🧍"; 
-        var tip = "";
-        
+        var roles = { avatar: "🧍", kledingTip: "" };
         var isRegen = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) || regenkans > 50;
         var isOnweer = [95, 96, 99].includes(code);
         var isSneeuw = [71, 73, 75].includes(code);
-        var isStorm = windSnelheid > 35;
 
-        if (isOnweer) {
-            mens = "🏃⚡"; 
-        } else if (isStorm) {
-            mens = "💨🚶‍♀️"; 
-        } else if (isRegen) {
-            mens = "🧑‍🌾☔"; 
-        } else if (isSneeuw) {
-            mens = "⛄🤾"; 
-        } else if (maxTemp >= 23) {
-            mens = "😎🩳"; 
-        } else if (maxTemp >= 17 && maxTemp < 23) {
-            mens = "👕💃"; 
-        } else if (maxTemp < 8) {
-            mens = "🥶🧥"; 
-        } else {
-            mens = "🚶‍♂️🧣"; 
-        }
+        if (isOnweer) { roles.avatar = "🏃⚡"; roles.kledingTip = "Onweer waarschuwing! Blijf lekker binnen en stel buitenactiviteiten even uit."; } 
+        else if (isRegen) { roles.avatar = "🧑‍🌾☔"; roles.kledingTip = "Regenkleding noodzakelijk. Neem een paraplu mee of trek je waterdichte jas aan."; } 
+        else if (isSneeuw) { roles.avatar = "⛄🤾"; roles.kledingTip = "Koud en winters! Dikke winterjas, handschoenen en muts zijn een must."; } 
+        else if (maxTemp >= 23) { roles.avatar = "😎🩳"; roles.kledingTip = "Heerlijk zomerweer! Korte broek en T-shirt kunnen aan. Smeer je goed in."; } 
+        else if (maxTemp >= 17) { roles.avatar = "👕💃"; roles.kledingTip = "Lekker zacht weer. Een longsleeve, lichte trui of T-shirt met een vestje is perfect."; } 
+        else if (maxTemp < 9) { roles.avatar = "🥶🧥"; roles.kledingTip = "Snijdend koud. Een warme winterjas, sjaal en extra lagen houden je warm."; } 
+        else { roles.avatar = "🚶‍♂️🧣"; roles.kledingTip = "Frisse dag. Een tussenjas, dikke trui of stevig jack is aan te raden."; }
 
-        if (isOnweer) {
-            tip = "<strong>Advies:</strong> Blijf tijdens buien binnen. Gevaar voor blikseminslag en felle windstoten.";
-        } else if (isSneeuw) {
-            tip = "<strong>Advies:</strong> Winterjas, muts en handschoenen verplicht! Gladheid ligt op de loer.";
-        } else if (isRegen && maxTemp < 15) {
-            tip = "<strong>Advies:</strong> Paraplu of regenjas mee, gecombineerd met een warme jas. Gure, natte dag.";
-        } else if (isRegen && maxTemp >= 15) {
-            tip = "<strong>Advies:</strong> Een milde maar natte dag. Neem een lichte jas of plu mee, een korte broek kan mits je tegen druppels kunt!";
-        } else if (isStorm) {
-            tip = "<strong>Advies:</strong> Windjack aan en hou je pet vast! Niet ideaal voor een boswandeling.";
-        } else if (maxTemp >= 24) {
-            tip = "<strong>Advies:</strong> Smeer je in! Korte broek, rokje of zomerjurk zijn perfect. Heerlijk zomers weer.";
-        } else if (maxTemp >= 18 && maxTemp < 24) {
-            tip = "<strong>Advies:</strong> T-shirt of lichte blouse met een spijkerbroek is perfect. Neem voor de avond een dun vestje mee.";
-        } else if (maxTemp >= 10 && maxTemp < 18) {
-            tip = "<strong>Advies:</strong> Een tussenjas of een lekkere trui/sweater is vandaag geen overbodige luxe.";
-        } else {
-            tip = "<strong>Advies:</strong> Kleed je in laagjes. Een dikke winterjas of warme mantel is nodig om warm te blijven.";
-        }
-
-        return { avatar: mens, kledingTip: tip };
-    }
-
-    function berekenBronConsensus(index, lat, lon, kans, code) {
-        var basisConsensus = 95;
-        var primairModel = "ECMWF (Europa)";
-        var termijnStraf = index * 4; 
-        var modelConsensus = basisConsensus - termijnStraf;
-
-        if(lat > 49 && lat < 54 && lon > 2 && lon < 8) {
-            primairModel = index <= 2 ? "KNMI (NL) + Harmonie-grid" : "ECMWF Ensemble Grid";
-            if (kans > 20 && kans < 70) modelConsensus -= 5;
-        } else {
-            primairModel = "ECMWF / NOAA Global Ensemble";
-            if (code > 3) modelConsensus -= 3;
-        }
-        if (modelConsensus < 62) modelConsensus = 62; 
-        
-        var statusTekst = "Betrouwbaarheid is uitstekend.";
-        if(modelConsensus < 85 && modelConsensus >= 72) statusTekst = "Lichte variatie tussen modellen.";
-        else if(modelConsensus < 72) statusTekst = "Hoge modelonzekerheid op lange termijn.";
-
-        return "<strong>Consensus:</strong> " + modelConsensus + "% overeenstemming.<br>" +
-               "<strong>Hoofdgewicht:</strong> " + primairModel + ".<br>" +
-               "<em>Status: " + statusTekst + "</em>";
+        return roles;
     }
 
     function haalWeer(lat, lon, naam) {
-        var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,uv_index_max,weather_code&timezone=auto";
+        var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,uv_index_max,weather_code,sunrise,sunset&timezone=auto";
+        zetStatus("Multi-Model berekening uitvoeren...");
         
-        fetch(url)
-            .then(function(r){ return r.json(); })
-            .then(function(data){
-                globalWeerData = data; 
-                verbergStatus();
-                
-                document.getElementById('weerDashboard').style.display = 'block';
-                document.getElementById('weerLocatie').innerText = naam;
-                
-                var nu = new Date();
-                var dag = nu.toLocaleDateString('nl-NL', {weekday:'long', day:'numeric', month:'long'});
-                var tijd = nu.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
-                document.getElementById('weerTijd').innerText = dag + " | Bijgewerkt om " + tijd;
-                
-                var maxTempVandaag = data.daily.temperature_2m_max[0];
-                var kansVandaag = data.daily.precipitation_probability_max[0];
-                var codeVandaag = data.current.weather_code;
-                var windVandaag = data.current.wind_speed_10m;
+        fetch(url).then(function(r){ return r.json(); }).then(function(data){
+            globalWeerData = data; verbergStatus();
+            document.getElementById('weerDashboard').style.display = 'block';
+            document.getElementById('weerLocatie').innerText = naam;
+            
+            var nu = new Date();
+            var opties = { weekday: 'short', day: 'numeric', month: 'short' };
+            document.getElementById('weerTijd').innerText = nu.toLocaleDateString('nl-NL', opties) + " | Update: " + nu.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+            
+            var maxT = data.daily.temperature_2m_max[0];
+            var kansT = data.daily.precipitation_probability_max[0];
+            var codeT = data.current.weather_code;
+            var windT = data.current.wind_speed_10m;
 
-                document.getElementById('vandaagNu').innerText = data.current.temperature_2m + "°C";
-                document.getElementById('vandaagMinMax').innerText = data.daily.temperature_2m_min[0] + "°C / " + maxTempVandaag + "°C";
-                
-                var graden = data.current.wind_direction_10m;
-                var richtingen = ['N', 'NO', 'O', 'ZO', 'Z', 'ZW', 'W', 'NW'];
-                var ricText = richtingen[Math.round(graden / 45) % 8];
-                document.getElementById('vandaagWind').innerText = windVandaag + " km/u (" + ricText + ")";
-                
-                document.getElementById('vandaagKans').innerText = kansVandaag + "%";
-                document.getElementById('vandaagMms').innerText = data.daily.precipitation_sum[0] + " mm";
-                
-                var onweer = "Laag";
-                if([95,96,99].includes(codeVandaag)) { onweer = "⚠️ Actief Onweer!"; }
-                else if(kansVandaag > 60 && maxTempVandaag > 22) { onweer = "Matig (Kans op)"; }
-                document.getElementById('vandaagOnweer').innerText = onweer + " / UV: " + data.daily.uv_index_max[0];
-                document.getElementById('vandaagStatus').innerText = geefStatusTekst(codeVandaag);
-                
-                var resultaatVandaag = genereerWeerMensEnTip(codeVandaag, maxTempVandaag, kansVandaag, windVandaag);
-                document.getElementById('vandaagMensAvatar').innerText = resultaatVandaag.avatar;
-                document.getElementById('vandaagTip').innerHTML = resultaatVandaag.kledingTip;
+            // Voer de slimme geografische weging uit op basis van de huidige lat/lon coördinaten
+            berekenGeoWeging(lat, lon, codeT);
 
-                document.getElementById('vandaagModellen').innerHTML = berekenBronConsensus(0, lat, lon, kansVandaag, codeVandaag);
-                
-                var lijst = document.getElementById('komendeDagen');
-                lijst.innerHTML = '';
-                
-                for(var i = 1; i <= 6; i++) {
-                    if(!data.daily.time[i]) break;
-                    var dObj = new Date(data.daily.time[i]);
-                    var dNaam = weekdagen[dObj.getDay()];
-                    
-                    var dagCode = data.daily.weather_code[i];
-                    var dagMax = data.daily.temperature_2m_max[i];
-                    var dagKans = data.daily.precipitation_probability_max[i];
-                    
-                    var dagVisual = genereerWeerMensEnTip(dagCode, dagMax, dagKans, 15);
+            // Automatische Nachtmodus
+            if(nu.getHours() >= new Date(data.daily.sunset[0]).getHours() || nu.getHours() < 6) document.body.classList.add('dark-mode');
+            else document.body.classList.remove('dark-mode');
 
-                    var row = document.createElement('div');
-                    row.className = 'rij';
-                    row.setAttribute('onclick', 'toonDetails(' + i + ')');
-                    
-                    row.innerHTML = '<div class="rij-mens">' + dagVisual.avatar + '</div>' +
-                                    '<div class="rij-day">' + dNaam + '</div>' +
-                                    '<div class="rij-desc">' + geefStatusTekst(dagCode) + '</div>' +
-                                    '<div class="rij-rain">💧 ' + dagKans + '%</div>' +
-                                    '<div class="rij-temp">' + Math.round(data.daily.temperature_2m_min[i]) + '° / ' + Math.round(dagMax) + '°</div>' +
-                                    '<div class="rij-pijl">❯</div>';
-                    lijst.appendChild(row);
-                }
-                
-                toonVandaag(); 
-            })
-            .catch(function(){ zetFout("Fout bij ophalen weerdata."); });
+            berekenHobbyIndexen(data.current.temperature_2m, kansT, windT, codeT);
+            haalExtraMilieuData(lat, lon);
+
+            // Vul Hero View
+            document.getElementById('heroTemp').innerText = Math.round(data.current.temperature_2m) + "°C";
+            document.getElementById('heroWeatherIcon').innerText = geefSimpelIcoontje(codeT);
+            document.getElementById('heroStatusText').innerText = geefStatusTekst(codeT);
+            
+            var vVisual = genereerWeerMensEnTip(codeT, maxT, kansT, windT);
+            document.getElementById('heroDressIcon').innerText = vVisual.avatar;
+            document.getElementById('heroKledingTip').innerText = vVisual.kledingTip;
+
+            // Details invullen
+            document.getElementById('vandaagMinMax').innerText = data.daily.temperature_2m_min[0] + "°C / " + maxT + "°C";
+            document.getElementById('vandaagWind').innerText = Math.round(windT) + " km/u";
+            document.getElementById('vandaagKans').innerText = kansT + "%";
+            document.getElementById('vandaagMms').innerText = data.daily.precipitation_sum[0] + " mm";
+            document.getElementById('vandaagUV').innerText = data.daily.uv_index_max[0] + " UV";
+            
+            var rise = new Date(data.daily.sunrise[0]).toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+            var set = new Date(data.daily.sunset[0]).toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('vandaagAstro').innerHTML = "🌅 Zon op: <strong>" + rise + "</strong> | 🌇 Zon onder: <strong>" + set + "</strong>";
+
+            // Uur-balk genereren
+            var sb = document.getElementById('uurScrollBalk'); sb.innerHTML = '';
+            var hIdx = nu.getHours();
+            for(var h = hIdx; h < hIdx + 24; h++) {
+                var item = document.createElement('div'); item.className = 'hourly-item';
+                item.innerHTML = '<div class="time">' + (h % 24) + ':00</div>' +
+                                 '<div class="icon">' + geefSimpelIcoontje(data.hourly.weather_code[h]) + '</div>' +
+                                 '<div class="temp">' + Math.round(data.hourly.temperature_2m[h]) + '°</div>';
+                sb.appendChild(item);
+            }
+
+            // Radar herstellen
+            document.getElementById('radarContainer').innerHTML = '<iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&zoom=7&overlay=rain&product=ecmwf&level=surface&lat=' + lat + '&lon=' + lon + '"></iframe>';
+
+            // Weeklijst genereren
+            var lijst = document.getElementById('komendeDagen'); lijst.innerHTML = '';
+            for(var i = 1; i <= 6; i++) {
+                if(!data.daily.time[i]) break;
+                var dObj = new Date(data.daily.time[i]);
+                var dCode = data.daily.weather_code[i];
+                var dMax = data.daily.temperature_2m_max[i];
+                var dKans = data.daily.precipitation_probability_max[i];
+                var dVisual = genereerWeerMensEnTip(dCode, dMax, dKans, 15);
+
+                var row = document.createElement('div'); row.className = 'rij';
+                row.setAttribute('onclick', 'toonDetails(' + i + ')');
+                row.innerHTML = '<div class="rij-mens">' + dVisual.avatar + '</div>' +
+                                '<div class="rij-day">' + dObj.toLocaleDateString('nl-NL', {weekday:'short'}) + '</div>' +
+                                '<div class="rij-desc">' + geefStatusTekst(dCode) + '</div>' +
+                                '<div class="rij-rain">💧 ' + dKans + '%</div>' +
+                                '<div class="rij-temp">' + Math.round(data.daily.temperature_2m_min[i]) + '° / ' + Math.round(dMax) + '°</div>';
+                lijst.appendChild(row);
+            }
+            toonVandaag();
+        }).catch(function(){ zetFout("Fout bij het genereren van de consensus."); });
     }
 
     function toonDetails(index) {
         if(!globalWeerData) return;
-        
-        var d = globalWeerData.daily;
+        var d = globalWeerData.daily; 
         var dObj = new Date(d.time[index]);
-        var dNaam = weekdagen[dObj.getDay()] + " " + dObj.toLocaleDateString('nl-NL', {day:'numeric', month:'short'});
-        
-        var dagCode = d.weather_code[index];
-        var dagMax = d.temperature_2m_max[index];
-        var dagKans = d.precipitation_probability_max[index];
+        var dCode = d.weather_code[index]; 
+        var dMax = d.temperature_2m_max[index]; 
+        var dKans = d.precipitation_probability_max[index];
 
-        document.getElementById('detailDagNaam').innerText = "Details voor " + dNaam;
-        document.getElementById('detStatus').innerText = geefStatusTekst(dagCode);
+        document.getElementById('detailDagNaam').innerText = dObj.toLocaleDateString('nl-NL', {weekday:'long', month:'short', day:'numeric'});
+        document.getElementById('detStatus').innerText = geefStatusTekst(dCode);
         document.getElementById('detMin').innerText = d.temperature_2m_min[index] + "°C";
-        document.getElementById('detMax').innerText = dagMax + "°C";
-        document.getElementById('detKans').innerText = dagKans + "%";
+        document.getElementById('detMax').innerText = dMax + "°C";
+        document.getElementById('detKans').innerText = dKans + "%";
         document.getElementById('detMms').innerText = d.precipitation_sum[index] + " mm";
+        document.getElementById('detUV').innerText = d.uv_index_max[index] + " UV";
         
-        var onweer = "Laag";
-        if([95,96,99].includes(dagCode)) { onweer = "⚠️ JA, Hoog risico!"; }
-        else if(dagKans > 60 && dagMax > 22) { onweer = "Matig (Kans op broeierige bui)"; }
-        document.getElementById('detOnweer').innerText = onweer + " / Max UV: " + d.uv_index_max[index];
-        
-        var resultaatDetail = genereerWeerMensEnTip(dagCode, dagMax, dagKans, 15);
-        document.getElementById('detailMensAvatar').innerText = resultaatDetail.avatar;
-        document.getElementById('detailTip').innerHTML = resultaatDetail.kledingTip;
-
-        document.getElementById('detailModellen').innerHTML = berekenBronConsensus(index, globalLat, globalLon, dagKans, dagCode);
+        var res = genereerWeerMensEnTip(dCode, dMax, dKans, 15);
+        document.getElementById('detailMensAvatar').innerText = res.avatar;
+        document.getElementById('detailTip').innerText = res.kledingTip;
         
         document.getElementById('schermVandaag').classList.remove('actief');
         document.getElementById('schermDetail').classList.add('actief');
-        
         window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function toonVandaag() {
-        document.getElementById('schermDetail').classList.remove('actief');
-        document.getElementById('schermVandaag').classList.add('actief');
+    function toonVandaag() { 
+        document.getElementById('schermDetail').classList.remove('actief'); 
+        document.getElementById('schermVandaag').classList.add('actief'); 
+    }
+
+    function geefSimpelIcoontje(c) {
+        if(c == 0 || c == 1) return "☀️"; 
+        if(c == 2 || c == 3) return "⛅"; 
+        if([45,48].includes(c)) return "🌫️";
+        if([51,53,55,61,63,65,80,81,82].includes(c)) return "🌧️"; 
+        if([71,73,75].includes(c)) return "❄️";
+        if([95,96,99].includes(c)) return "⚡"; 
+        return "☁️";
     }
 
     function geefStatusTekst(c) {
-        var codes = {
-            0: "Helder", 1: "Onbewolkt", 2: "Licht bewolkt", 3: "Bewolkt",
-            45: "Mist", 48: "Rijpnevel", 51: "Lichte motregen", 53: "Motregen",
-            55: "Dichte motregen", 61: "Lichte regen", 63: "Regen", 65: "Zware regen",
-            71: "Lichte sneeuw", 73: "Sneeuw", 75: "Zware sneeuw",
-            80: "Lichte bui", 81: "Regenbui", 82: "Hevige bui",
-            95: "Onweer", 96: "Onweer + hagel", 99: "Zwaar onweer"
+        var codes = { 
+            0: "Helder", 1: "Onbewolkt", 2: "Licht bewolkt", 3: "Bewolkt", 
+            45: "Mistig", 48: "Rijp/Mist", 51: "Lichte motregen", 53: "Motregen", 55: "Dichte motregen",
+            61: "Lichte regen", 63: "Regen", 65: "Zware regen", 71: "Lichte sneeuw", 73: "Sneeuw", 
+            75: "Zware sneeuw", 80: "Lichte buien", 81: "Regenbuien", 82: "Zware buien", 
+            95: "Onweer", 96: "Onweer met hagel", 99: "Zwaar onweer" 
         };
-        return codes[c] || "Wisselend";
+        return codes[c] || "Wisselvallend";
     }
 </script>
-
 </body>
 </html>
